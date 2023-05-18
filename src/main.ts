@@ -1,3 +1,7 @@
 import 'dotenv/config'
+import { runApp } from './server/server'
 
-console.log('Hello World')
+const port = +(process.env.PORT || 3000)
+runApp()
+  .then(server => server.listen({ port }))
+  .catch(console.error)

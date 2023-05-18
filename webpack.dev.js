@@ -28,6 +28,6 @@ module.exports = merge(common, {
     new ForkTsCheckerWebpackPlugin({
       async: true,
     }),
-    new RunScriptWebpackPlugin({ name: common.mainFile, autoRestart: false }),
+    new RunScriptWebpackPlugin({ name: common.mainFile, autoRestart: true, restartable: true, keyboard: true }),
   ],
 })
