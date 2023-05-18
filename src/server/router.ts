@@ -9,7 +9,7 @@ async function router(server: FastifyInstance, _options: any) {
 
   server.get('/watch', async function (request, reply) {
     const { anime } = request.query as any
-    return reply.view('watch', { title: `Watch ${anime}`, js: ['playerjs.js', 'watch.js'] })
+    return reply.view('watch', { title: `Watch ${anime}`, js: ['watch.js'] })
   })
 
   server.get('/stream', async function (request, _reply) {
