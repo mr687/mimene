@@ -2,12 +2,21 @@ import { join as pathJoin } from 'path'
 
 import * as fastify from 'fastify'
 
+function getRootDir() {
+  const isProd = process.env.NODE_ENV === 'production'
+  if (isProd) {
+    return pathJoin(__dirname)
+  }
+  return pathJoin(__dirname, '..')
+}
+
 export async function runApp() {
   const server = fastify({
     logger: {
       transport: {
         target: '@fastify/one-line-logger',
       },
+      level: process.env.LOG_LEVEL || 'trace',
     },
   })
 
@@ -30,7 +39,7 @@ export async function runApp() {
   await server.register(import('@fastify/compress'), {})
   await server.register(import('@fastify/etag'))
   await server.register(require('@fastify/static'), {
-    root: pathJoin(__dirname, '..', 'public'),
+    root: pathJoin(getRootDir(), 'public'),
     prefix: '/public/',
     constraints: {},
   })
@@ -38,7 +47,7 @@ export async function runApp() {
     engine: {
       handlebars: await import('handlebars'),
     },
-    root: pathJoin(__dirname, '..', 'src', 'views'),
+    root: pathJoin(getRootDir(), 'views'),
     layout: './templ/default',
     viewExt: 'html',
     options: {

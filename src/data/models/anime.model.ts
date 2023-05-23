@@ -1,4 +1,5 @@
 import { Prop, getModelForClass, modelOptions } from '@typegoose/typegoose'
+import { HydratedDocument } from 'mongoose'
 
 @modelOptions({
   schemaOptions: {
@@ -9,14 +10,18 @@ export class AnimeSchema {
   @Prop({ required: true })
   title: string
 
-  @Prop({ required: true })
+  @Prop({ required: true, index: true })
   eps: number
 
   @Prop({ required: true })
-  serverUrl: number
+  serverUrl: string
+
+  @Prop({ required: true, index: true })
+  anime: string
 
   @Prop({ required: true })
-  anime: string
+  source: string
 }
 
+export type AnimeDocument = HydratedDocument<AnimeSchema>
 export const AnimeModel = getModelForClass(AnimeSchema)
