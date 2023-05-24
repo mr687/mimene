@@ -20,6 +20,9 @@ export async function runApp() {
     },
   })
 
+  await server.register(import('@fastify/middie'), {
+    hook: 'onRequest',
+  })
   await server.register(import('@fastify/helmet'), { contentSecurityPolicy: false })
   await server.register(import('@fastify/cors'), {
     origin: (origin, cb) => {

@@ -1,27 +1,33 @@
 import { FastifyInstance } from 'fastify'
-import { startCase } from 'lodash'
 
-import { AnimeModel } from 'src/data/models/anime.model'
+import { UserWatchModel } from 'src/data/models/user-watch.model'
 import { getStreamUrl } from 'src/data/utils/anime.util'
+
+const localhostIps = ['::1', '127.0.0.1', 'localhost']
+const isProd = process.env.NODE_ENV === 'production'
+
+const getIp = (request: any) => {
+  let clientIp = request.headers['x-forwarded-for'] || request.socket.remoteAddress
+  clientIp = clientIp && Array.isArray(clientIp) ? clientIp[0] : clientIp
+  if (isProd || !clientIp || localhostIps.includes(clientIp)) {
+    return undefined
+  }
+  return clientIp
+}
 
 async function router(server: FastifyInstance, _options: any) {
   server.get('/', async function (_request, reply) {
     return reply.view('index', { title: 'Hello World' })
   })
 
-  server.get('/:anime(^\\w+).txt', async function (request, reply) {
-    const { anime } = request.params as any
-
-    const animes = await AnimeModel.find({
-      anime: startCase(anime),
-    })
-
-    return reply.send(animes.length)
-  })
-
   server.get('/watch', async function (request, reply) {
     const { anime } = request.query as any
-    return reply.view('watch', { title: `Watch ${anime}`, js: ['watch.js'] })
+    const clientIp = getIp(request)
+
+    const session = await UserWatchModel.findOne({ clientIp }).lean()
+    const playerJsSession = JSON.stringify(session?.playerjsSession)
+
+    return reply.view('watch', { title: `Watch ${anime}`, js: ['watch.js'], playerJsSession: playerJsSession })
   })
 
   server.get('/stream', async function (request, _reply) {
@@ -35,6 +41,32 @@ async function router(server: FastifyInstance, _options: any) {
     }
 
     return urlRes.videoUrl
+  })
+
+  server.post('/sync-session', async function (request, reply) {
+    const clientIp = getIp(request)
+
+    if (isProd && (!clientIp || localhostIps.includes(clientIp))) {
+      return reply.code(201).send()
+    }
+
+    const { session } = request.body as any
+
+    if (!session) {
+      return reply.code(201).send()
+    }
+
+    await UserWatchModel.updateOne(
+      { clientIp },
+      {
+        $set: {
+          playerjsSession: session,
+        },
+      },
+      { upsert: true },
+    )
+
+    return reply.code(201).send()
   })
 }
 
