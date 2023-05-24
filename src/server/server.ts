@@ -35,6 +35,12 @@ export async function runApp() {
         cb(null, true)
         return
       }
+
+      if (hostname.endsWith('.jigamon.me')) {
+        cb(null, true)
+        return
+      }
+
       // Generate an error on other origins, disabling access
       cb(new Error('Not allowed'), false)
     },

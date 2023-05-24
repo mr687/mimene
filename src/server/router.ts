@@ -9,7 +9,7 @@ const isProd = process.env.NODE_ENV === 'production'
 const getIp = (request: any) => {
   let clientIp = request.headers['x-forwarded-for'] || request.socket.remoteAddress
   clientIp = clientIp && Array.isArray(clientIp) ? clientIp[0] : clientIp
-  if (isProd || !clientIp || localhostIps.includes(clientIp)) {
+  if (isProd && (!clientIp || localhostIps.includes(clientIp))) {
     return undefined
   }
   return clientIp
@@ -46,7 +46,7 @@ async function router(server: FastifyInstance, _options: any) {
   server.post('/sync-session', async function (request, reply) {
     const clientIp = getIp(request)
 
-    if (isProd && (!clientIp || localhostIps.includes(clientIp))) {
+    if (!clientIp) {
       return reply.code(201).send()
     }
 

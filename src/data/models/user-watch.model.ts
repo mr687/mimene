@@ -1,7 +1,10 @@
 import { ModelOptions, Prop, Severity, getModelForClass } from '@typegoose/typegoose'
 import { HydratedDocument } from 'mongoose'
 
-@ModelOptions({ schemaOptions: { timestamps: true }, options: { allowMixed: Severity.ALLOW } })
+@ModelOptions({
+  schemaOptions: { timestamps: true, collection: 'userwatchschemas' },
+  options: { allowMixed: Severity.ALLOW },
+})
 export class UserWatchSchema {
   @Prop({ required: true })
   clientIp: string
